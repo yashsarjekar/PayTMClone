@@ -117,8 +117,61 @@ async function login(req, res){
 }
 
 
+async function userdata(req, res) {
+    const users = await User.find();
+    records = []
+
+    for (let ind=0; ind < users.length; ind ++){
+        const record = {
+            firstname: users[ind].firstname,
+            lastname: users[ind].lastname,
+            email: users[ind].email,
+            age: users[ind].age
+        };
+        records.push(record);
+    }
+
+    res.status(200).json(
+        {
+            status: 200,
+            result: records.slice(0, 1),
+            total_count: records.length
+        }   
+    )
+}
+
+async function searchuser(req, res) {
+    const filter = req.query.filter || "";
+    const users = await User.find({
+        $or:[{
+            firstname: {
+                "$regex": filter
+            }
+        },
+        {
+            lastname: {
+                "$regex": filter
+            }
+        }
+    ]
+    });
+    records = []
+
+    res.json({
+        user: users.map(user => ({
+            username: user.username,
+            firstName: user.firstname,
+            lastName: user.lastname,
+            _id: user._id
+        }))
+    })
+}
+
+
 module.exports = {
     register_user,
     login_validation,
-    login
+    login,
+    userdata,
+    searchuser
 };

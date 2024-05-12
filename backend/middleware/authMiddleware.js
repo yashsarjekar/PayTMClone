@@ -36,6 +36,7 @@ async function authMiddleware(req, res, next){
                     }
                 );
             }else{
+                req.user_id = decoded_data.user_id;
                 next();
             }
         }
