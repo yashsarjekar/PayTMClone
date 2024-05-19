@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cookie_parser = require('cookie-parser');
 const userRoutes = require("./routes/userRoutes");
 const accountRoutes = require("./routes/accountRoutes");
+const dbConfig = require("./configs/dbConfig");
 const cors = require("cors");
 app = express();
 app.use(cors());
@@ -14,7 +15,8 @@ app.use(cookie_parser());
 const port = 3000;
 const hostname = '0.0.0.0';
 mongoose.connect(
-    "mongodb+srv://ysarjekar:6pnizps3ur8ChMir@cluster0.0pxk7oy.mongodb.net/paytm"
+    `mongodb+srv://${dbConfig.mongodb.username}:${dbConfig.mongodb.password}@${dbConfig.mongodb
+    .hostname}/${dbConfig.mongodb.database_name}`
 )
 app.use(userRoutes);
 app.use(accountRoutes);
