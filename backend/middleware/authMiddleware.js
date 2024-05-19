@@ -3,14 +3,14 @@ const User = require("../models/userModel");
 
 async function authMiddleware(req, res, next){
     try {
-        const token = req.cookies.jwt || req.header.authorization;
-
+        const authtoken = req.headers.authorization
+        const token = authtoken.split(' ')[1];
         if (!token) {
             res.status(401).json(
                 {
                     status: 401,
                     message: "Access Denied",
-                    succes: false
+                    success: false
                 }
             );
         }
@@ -22,7 +22,7 @@ async function authMiddleware(req, res, next){
                 {
                     status: 401,
                     message: "Access Denied",
-                    succes: false
+                    success: false
                 }
             );
         }else{
@@ -32,7 +32,7 @@ async function authMiddleware(req, res, next){
                     {
                         status: 401,
                         message: "Token is expired, Please Login again",
-                        succes: false
+                        success: false
                     }
                 );
             }else{

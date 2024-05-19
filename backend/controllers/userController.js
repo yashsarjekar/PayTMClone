@@ -3,8 +3,8 @@ const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookie = require('cookie');
-
-
+const mongoose = require("mongoose");
+const Account = require("../models/accountModel");
 
 async function passwordHashing(password) {
     try{
@@ -19,6 +19,7 @@ async function passwordHashing(password) {
 
 
 async function register_user(req, res){
+    const session = await mongoose.startSession();
     const serializer =  UserSchemaVal.UserInputValidation.safeParse(req.body);
     if (!serializer.success){
         res.status(403).json({
@@ -33,11 +34,12 @@ async function register_user(req, res){
             res.status(400).json({
                 status: 400,
                 message: "User Already Exist!",
-                succes: false
+                success: false
             })
         }else {
             try {
                 hash_password = await passwordHashing(request_body.password)
+                session.startTransaction();
                 const user = new User(
                     {
                         firstname: request_body.firstname,
@@ -45,17 +47,26 @@ async function register_user(req, res){
                         username: request_body.username,
                         email: request_body.email,
                         password: hash_password,
-                        age: 26
+                        age: request_body.age
                     }
                 );
                 user.save().then(function sendSuccessResponse(){
+                    const userId = user._id;
+                    const account = new Account({
+                        userId: userId,
+                        balance: 0
+                    })
+                    
+                    account.save();
+                    session.commitTransaction();
                     res.status(200).json({
                         status: 200,
                         message: "User Successfully Register",
-                        succes: true
+                        success: true
                     });
                 });
             }catch(error) {
+                console.log(error)
                 res.status(500).json({
                     status: 500,
                     message: "Internal Server Error",
@@ -74,7 +85,7 @@ function login_validation(req, res, next){
         res.status(403).json({
             status: 403,
             message: "Invalid User Inputs",
-            succes: false
+            success: false
         })
     }else{
         next();
@@ -90,7 +101,7 @@ async function login(req, res){
         res.status(400).json({
             status: 400,
             message: "Email Does Not Exist",
-            succes: false
+            success: false
         }); 
     }else{
         hashed_password = userExist.password;
@@ -103,13 +114,14 @@ async function login(req, res){
             }, 'shhhhh');
             res.setHeader('Set-Cookie', cookie.serialize('jwt', token));
             res.status(200).json({
-                token: token
+                token: token,
+                success: true
             })
         }else{
             res.status(400).json({
                 status: 400,
                 message: "Invalid Credentials",
-                succes: false
+                success: false
             });
         }
     }
@@ -118,24 +130,29 @@ async function login(req, res){
 
 
 async function userdata(req, res) {
+    current_user_id = req.user_id;
     const users = await User.find();
     records = []
 
     for (let ind=0; ind < users.length; ind ++){
-        const record = {
-            firstname: users[ind].firstname,
-            lastname: users[ind].lastname,
-            email: users[ind].email,
-            age: users[ind].age
-        };
-        records.push(record);
+        if (current_user_id != users[ind]._id){
+            const record = {
+                firstname: users[ind].firstname,
+                lastname: users[ind].lastname,
+                email: users[ind].email,
+                age: users[ind].age,
+                _id: users[ind]._id
+            };
+            records.push(record);
+        }
     }
 
     res.status(200).json(
         {
             status: 200,
-            result: records.slice(0, 1),
-            total_count: records.length
+            result: records.slice(0, 10),
+            total_count: records.length,
+            success:true
         }   
     )
 }
@@ -159,12 +176,38 @@ async function searchuser(req, res) {
 
     res.json({
         user: users.map(user => ({
-            username: user.username,
-            firstName: user.firstname,
-            lastName: user.lastname,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            email: user.email,
+            age: user.age,
             _id: user._id
-        }))
+        })),
+        success: true
     })
+}
+
+async function userdata_based_on_id(req, res) {
+    const users = await User.find({_id: req.query.to_id});
+    records = []
+
+    for (let ind=0; ind < users.length; ind ++){
+        const record = {
+            firstname: users[ind].firstname,
+            lastname: users[ind].lastname,
+            email: users[ind].email,
+            age: users[ind].age,
+            _id: users[ind]._id
+        };
+        records.push(record);
+    }
+    res.status(200).json(
+        {
+            status: 200,
+            result: records.slice(0, 1),
+            total_count: records.length,
+            success:true
+        }   
+    )
 }
 
 
@@ -173,5 +216,6 @@ module.exports = {
     login_validation,
     login,
     userdata,
-    searchuser
+    searchuser,
+    userdata_based_on_id
 };

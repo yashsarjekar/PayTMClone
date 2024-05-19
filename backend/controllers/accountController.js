@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Account = require("../models/accountModel");
 const AccountValidation = require("../validations/accountValidation");
 const Transaction = require("../models/transactionModel");
+const User = require("../models/userModel");
 
 
 async function credit(req, res){
@@ -12,7 +13,7 @@ async function credit(req, res){
         res.status(403).json({
             status: 403,
             message: "Invalid Inputs",
-            succes: false
+            success: false
         })
     }else{
         try{
@@ -44,7 +45,7 @@ async function credit(req, res){
                 res.status(200).json({
                     status: 200,
                     message: "Amount Credited",
-                    succes: true
+                    success: true
                 });  
             }else{
                 session.startTransaction();
@@ -68,7 +69,7 @@ async function credit(req, res){
                     res.status(200).json({
                         status: 200,
                         message: "Amount Credited",
-                        succes: true
+                        success: true
                     });
                 })
             }
@@ -92,7 +93,7 @@ async function debit(req, res){
         res.status(403).json({
             status: 403,
             message: "Invalid Inputs",
-            succes: false
+            success: false
         })
     }else{
         try{
@@ -125,13 +126,13 @@ async function debit(req, res){
                     res.status(200).json({
                         status: 200,
                         message: "Amount Debited",
-                        succes: true
+                        success: true
                     });  
                 }else{
                     res.status(200).json({
                         status: 200,
                         message: "Insufficient Balance in your wallet",
-                        succes: true
+                        success: true
                     }); 
                 }
                 
@@ -145,7 +146,7 @@ async function debit(req, res){
                     res.status(200).json({
                         status: 200,
                         message: "Amount balance is already 0",
-                        succes: true
+                        success: true
                     });
                 })
             }
@@ -217,13 +218,13 @@ async function transferfunds(req, res){
                 res.status(200).json({
                     status: 200,
                     message: "Payment Done Successfully",
-                    succes: true
+                    success: true
                 });
             }else{
                 res.status(200).json({
                     status: 200,
                     message: "Insufficient Balance in your wallet",
-                    succes: true
+                    success: true
                 });
             }
             
@@ -244,8 +245,108 @@ async function transferfunds(req, res){
     
 }
 
+async function dashboard(req, res){
+    try{
+        user_id = req.user_id
+        account_details = await Account.find({userId: user_id})
+        user_details = await User.find({_id: user_id})
+        transaction_details = await Transaction.find({userId: user_id})
+
+        total_credited = 0
+        total_debited = 0
+
+        for (let ind=0; ind < transaction_details.length; ind ++){
+            if (transaction_details[ind].is_credited){
+                total_credited += transaction_details[ind].amount
+            }
+            if (transaction_details[ind].is_debited){
+                total_debited += transaction_details[ind].amount
+            }
+        }
+        balance = 0
+        if (account_details.length > 0){
+            balance = account_details[0].balance
+        }
+        res.status(200).json({
+            status: 200,
+            result: {
+                firstname: user_details[0].firstname,
+                lastname: user_details[0].lastname,
+                email: user_details[0].email,
+                age: user_details[0].age,
+                total_credited: total_credited,
+                total_debited: total_debited,
+                balance: balance,
+                id: user_details[0]._id
+            },
+            success: true
+        });
+
+
+    }catch(error) {
+        res.status(500).json({
+            status: 500,
+            message: "Internal Server Error",
+            success: false
+        })
+    }
+    
+}
+
+async function transaction_list(req, res){
+    try{
+        user_id = req.user_id
+        account_details = await Account.find({userId: user_id})
+        user_details = await User.find({_id: user_id})
+        transaction_details = await Transaction.find({userId: user_id})
+        transactions = []
+        for (let ind=0; ind < transaction_details.length; ind ++){  
+            let is_credited = true;
+            if (transaction_details[ind].is_credited==false){
+                is_credited = false
+            }
+            let from = null
+            if (transaction_details[ind].secondUserID){
+                second_user = await User.find({_id: transaction_details[ind].secondUserID.toString()});
+                from = `${second_user[0].firstname} ${second_user[0].lastname}`
+            }
+            record = {
+                second_user: from,
+                balance: transaction_details[ind].balance,
+                amount: transaction_details[ind].amount,
+                is_credited:is_credited
+            }
+            transactions.push(record);
+        }
+
+        res.status(200).json({
+            status: 200,
+            result: transactions,
+            success: true
+        });
+
+
+    }catch(error) {
+        console.log(error)
+        res.status(500).json({
+            status: 500,
+            message: "Internal Server Error",
+            success: false
+        })
+    }
+    
+}
+
+
+
+
+
+
+
 module.exports = {
     credit,
     debit,
-    transferfunds
+    transferfunds,
+    dashboard,
+    transaction_list
 }
