@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
-
+import ServerConfig from "../ServerConfig";
 
 export default function Login() {
     const [email_var, setEmail] = useState("");
@@ -19,7 +19,7 @@ export default function Login() {
     },[])
     const login = async ()=>{
         try{
-            const response = await axios.post("http://localhost:3000/login", {
+            const response = await axios.post(`http://${ServerConfig.serverconfig}/login`, {
                 email: email_var,
                 password: password_var
             });

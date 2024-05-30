@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import NavbarLink from "./NavbarLink";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-
+import ServerConfig from "../ServerConfig";
 export default function UsersList(){
     const [users, setUsers] = useState([]);
     const location = useLocation();
@@ -10,7 +10,7 @@ export default function UsersList(){
 
     useEffect(()=>{
         async function fetch_data(){
-            const response = await axios.get("http://localhost:3000/users", {
+            const response = await axios.get(`http://${ServerConfig.serverconfig}/users`, {
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token")
                 }
@@ -24,7 +24,7 @@ export default function UsersList(){
 
     async function fetch_user_data(){
         try{
-            const response = await axios.get(`http://localhost:3000/search?filter=${search}`, {
+            const response = await axios.get(`http://${ServerConfig.serverconfig}/search?filter=${search}`, {
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token")
                 }

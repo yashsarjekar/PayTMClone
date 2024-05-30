@@ -7,6 +7,7 @@ import SubmitButton from "./SubmitButton";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import ServerConfig from "../ServerConfig";
 
 export default function Signup() {
     const [first_name_var, setFirstName] = useState("");
@@ -19,7 +20,7 @@ export default function Signup() {
 
     const signup = async ()=>{
         try{
-            const response = await axios.post("http://localhost:3000/signup", {
+            const response = await axios.post(`http://${ServerConfig.serverconfig}/signup`, {
                 firstname: first_name_var,
                 lastname: last_name_var,
                 username: username_var,

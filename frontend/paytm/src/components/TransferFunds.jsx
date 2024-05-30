@@ -3,6 +3,7 @@ import InputField from "./InputField";
 import SubmitButton from "./SubmitButton";
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
+import ServerConfig from "../ServerConfig";
 
 export default function TransferFunds() {
     const location = useLocation();
@@ -13,7 +14,7 @@ export default function TransferFunds() {
 
     useEffect(()=>{
         async function fetch_data(){
-            const response = await axios.get("http://localhost:3000/user_based_on_id", {
+            const response = await axios.get(`http://${ServerConfig.serverconfig}/user_based_on_id`, {
                 params: {
                     to_id:to_id
                 },
@@ -31,7 +32,7 @@ export default function TransferFunds() {
 
     const transfer = async ()=>{
         try{
-            const response = await axios.post("http://localhost:3000/transferfund", {
+            const response = await axios.post(`http://${ServerConfig.serverconfig}/transferfund`, {
                 to: to_id,
                 amount: parseFloat(amount)
             }, {

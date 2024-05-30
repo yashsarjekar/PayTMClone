@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SubmitButton from "./SubmitButton";
 import InputField from "./InputField";
+import ServerConfig from "../ServerConfig";
 
 export default function DebitFunds() {
     const [amount, setAmount] = useState(0);
@@ -10,7 +11,7 @@ export default function DebitFunds() {
     const navigate = useNavigate();
     useEffect(()=>{
         async function fetch_data(){
-            const response = await axios.get("http://localhost:3000/dashboard", {
+            const response = await axios.get(`http://${ServerConfig.serverconfig}/dashboard`, {
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token")
                 }
@@ -23,7 +24,7 @@ export default function DebitFunds() {
     }, []);
     const debit = async ()=>{
         try{
-            const response = await axios.post("http://localhost:3000/debit", {
+            const response = await axios.post(`http://${ServerConfig.serverconfig}/debit`, {
                 amount: parseFloat(amount)
             }, {
                 headers: {

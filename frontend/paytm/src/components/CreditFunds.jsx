@@ -3,6 +3,7 @@ import InputField from "./InputField";
 import SubmitButton from "./SubmitButton";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ServerConfig from "../ServerConfig";
 
 export default function CreditFunds() {
     const [amount, setAmount] = useState(0);
@@ -10,7 +11,7 @@ export default function CreditFunds() {
 
     const credit = async ()=>{
         try{
-            const response = await axios.post("http://localhost:3000/credit", {
+            const response = await axios.post(`http://${ServerConfig.serverconfig}/credit`, {
                 amount: parseFloat(amount)
             },{
                 headers: {

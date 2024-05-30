@@ -10,6 +10,8 @@ import Transactions from "./Transactions";
 import TransferFunds from "./TransferFunds";
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Logout from "./Logout";
+import ServerConfig from "../ServerConfig";
+
 export default function Dashboard() {
     const [data_var, setData] = useState({});
     const location = useLocation();
@@ -41,7 +43,7 @@ export default function Dashboard() {
       ]
     useEffect(()=>{
         async function fetch_data(){
-            const response = await axios.get("http://localhost:3000/dashboard", {
+            const response = await axios.get(`http://${ServerConfig.serverconfig}/dashboard`, {
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token")
                 }

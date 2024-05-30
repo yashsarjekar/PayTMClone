@@ -1,14 +1,14 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-
+import ServerConfig from "../ServerConfig";
 export default function Transactions() {
     const [transactions, setTransactions] = useState([]);
     const location = useLocation();
 
     useEffect(()=>{
         async function fetch_data(){
-            const response = await axios.get("http://localhost:3000/transactions", {
+            const response = await axios.get(`http://${ServerConfig.serverconfig}/transactions`, {
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token")
                 }
