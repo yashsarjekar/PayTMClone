@@ -30,7 +30,7 @@ jobs:
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
-        run: cd backend && npx nodemon index.js & sleep 60
+        run: cd backend && npx nodemon index.js & sleep 30
 
   frontend-build-test:
     name: Frontend Build Test
@@ -66,4 +66,4 @@ jobs:
         run: npm install -g serve
 
       - name: Serve frontend
-        run: cd frontend/paytm/dist && serve & sleep 60
+        run: cd frontend/paytm/dist && serve & sleep 30
