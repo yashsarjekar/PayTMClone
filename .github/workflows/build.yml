@@ -24,6 +24,14 @@ jobs:
       - name: Run backend tests
         run: cd backend && npm test
 
+      - name: Run backend Server
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: cd backend && npx nodemon index.js
+
   frontend-build-test:
     name: Frontend Build Test
     runs-on: ubuntu-latest
@@ -48,6 +56,11 @@ jobs:
           npm test
 
       - name: Build frontend
+        env:
+          VITE_SERVERNAME: ${{ secrets.FRONTEND_SERVER }}
         run: |
           cd frontend/paytm
           npm run build
+
+      - name: Serve frontend
+        run: cd frontend/paytm/dist && serve
