@@ -21,5 +21,5 @@ mongoose.connect(
 app.use(userRoutes);
 app.use(accountRoutes);
 app.listen(port, hostname, function listening() {
-    console.log("Listening on port 3000")
+    console.log("Listening on port 3000:")
 });
