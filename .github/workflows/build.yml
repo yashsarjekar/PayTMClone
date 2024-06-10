@@ -38,10 +38,16 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: cd frontend && cd paytm && npm install .
+        run: |
+          cd frontend/paytm
+          npm install .
 
       - name: Run frontend tests
-        run: cd frontend && npm test
+        run: |
+          cd frontend/paytm
+          npm test
 
       - name: Build frontend
-        run: cd frontend && npm run build
+        run: |
+          cd frontend/paytm
+          npm run build
