@@ -47,15 +47,13 @@ jobs:
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
         run: |
           echo "$EC2_KEY" > ec2_key.pem
           chmod 400 ec2_key.pem
           scp -o StrictHostKeyChecking=no -i ec2_key.pem ./nginx.conf $EC2_USER@$EC2_HOST:/home/$EC2_USER/nginx.conf
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem $EC2_USER@$EC2_HOST << EOF
-            mkdir -p ~/.aws
-            echo "[default]" > ~/.aws/credentials
-            echo "aws_access_key_id = ${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
-            echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
             aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $IMAGE_URL
             docker stop backend-app || true
