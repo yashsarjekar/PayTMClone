@@ -52,10 +52,16 @@ jobs:
           chmod 400 ec2_key.pem
           scp -o StrictHostKeyChecking=no -i ec2_key.pem ./nginx.conf $EC2_USER@$EC2_HOST:/home/$EC2_USER/nginx.conf
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem $EC2_USER@$EC2_HOST << EOF
+            mkdir -p ~/.aws
+            echo "[default]" > ~/.aws/credentials
+            echo "aws_access_key_id = ${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
+            echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
+            aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $IMAGE_URL
             docker stop backend-app || true
             docker rm backend-app || true
             docker run -d -p 3000:3000 -e DB_HOST=$DB_HOST -e DB_USERNAME=$DB_USERNAME -e DB_PASSWORD=$DB_PASSWORD -e DB_NAME=$DB_NAME --name backend-app $IMAGE_URL
+            sudo apt install -y nginx
             sudo rm /etc/nginx/nginx.conf
             sudo mv /home/$EC2_USER/nginx.conf /etc/nginx/
             sudo nginx -t
